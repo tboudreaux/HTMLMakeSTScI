@@ -6,7 +6,7 @@ scope = ['https://spreadsheets.google.com/feeds']
 credentials = ServiceAccountCredentials.from_json_keyfile_name('SummerSTScI-ca588a8e388a.json', scope)
 
 gc = gspread.authorize(credentials)
-checkstar = 'sdssj9-10_212232.68+000426.6'
+checkstar = 'parvatii'
 start = os.path.abspath('.')
 urls_raw = [x.rsplit()[1] for x in open('tempurl.csv', 'rb').readlines()]
 indexes_raw = [x.rsplit()[0] for x in open('tempurl.csv', 'rb').readlines()]
@@ -22,7 +22,7 @@ power_index = []
 go = 0
 for Uitem, Iitem in zip(urls_raw, indexes_raw):
     if go < 1000:
-        print Uitem, Iitem
+        #print Uitem, Iitem
         go += 1
     if '_all' in Iitem:
         all_index.append(Iitem[:-9])
@@ -110,7 +110,7 @@ SOUTHDIR = []
 os.chdir('Targets/ARCHIVE')
 ARCHIVES = ['KNOWN', 'SOAR', 'NORTHERN', 'SOUTHERN']
 for subdir in ARCHIVES:
-    print 'CURRENT DIRECTORY IS: ', os.path.abspath('.')
+    #print 'CURRENT DIRECTORY IS: ', os.path.abspath('.')
     os.chdir(start)
     os.chdir('Targets/ARCHIVE/' + subdir)
     working_dir = os.path.abspath('.')
@@ -207,7 +207,7 @@ for subdir in ARCHIVES:
         pagenum += 1
         URLINDEX = 0
         allplot = all_url[all_index.index(dir[i])]
-        if dir[i] == 'sdssj9-10_212232.68+000426.6':
+        if dir[i] == checkstar:
             print htmlgo, alright
         if htmlgo is True and alright is False:
             #print 'writing out file for', dir[i]
@@ -353,7 +353,6 @@ for subdir in ARCHIVES:
         if pagenum > 0:
             prevlink = '../../../../' + addon + '/' + dir[i] + '/' + dir[i] + 'ViewPage.html'
         os.chdir('..')
-        print 'HERE'
     os.chdir(working_dir)
 os.chdir(start)
 
@@ -393,8 +392,6 @@ rankings = [rankings[0], rankings[3], rankings[2], rankings[1]]
 indexpage = open('index.html', 'w')
 linkagg = []
 for ARC in ARCHIVES:
-    print ARC
-    print 'KNOWNDIR:', KNOWNDIR
     subagg = []
     if ARC == 'SOAR':
         for index, folder in enumerate(SOARDIR):
@@ -402,7 +399,7 @@ for ARC in ARCHIVES:
             subagg.append(link)
     elif ARC == 'KNOWN':
         for index, folder in enumerate(KNOWNDIR):
-            print folder
+            #print folder
             link = 'Targets/ARCHIVE/' + ARC + '/' + folder + '/' + folder + 'ViewPage.html'
             subagg.append(link)
     elif ARC == 'NORTH':
@@ -415,15 +412,7 @@ for ARC in ARCHIVES:
             subagg.append(link)
     linkagg.append(subagg)
 linkagg_sorted = []
-print '@@@@@@@@@@@@@@@@@@'
-print linkagg
-print '@@@@@@@@@@@@@@@@@@'
 for i, j in zip(linkagg, rankings):
-    print '||||||||||||||||||'
-    print 'RANKINGS:', rankings
-    print 'i', i
-    print 'j', j
-    print '||||||||||||||||||'
     linkagg_sorted.append([x for (y, x) in sorted(zip(j, i))])
 indexpage.write('<!DOCTYPE html>\n'
                 '<html>\n'
@@ -442,6 +431,8 @@ indexpage.write('<!DOCTYPE html>\n'
                 '<table>\n') 
 check_link_size = [len(linkagg_sorted[0]), len(linkagg_sorted[1]), len(linkagg_sorted[2]), len(linkagg_sorted[3])]
 max_links = max(check_link_size)
+max_index = check_link_size.index(max_links)
+#print 'max_link', max_links
 for index, SUBARCHIVE in enumerate(linkagg_sorted):
     if index is 0:
         indexpage.write('\t<tr>\n')
@@ -455,18 +446,17 @@ for index, SUBARCHIVE in enumerate(linkagg_sorted):
     elif index is 3:
         indexpage.write('\t<tr>\n')
         indexpage.write('\t<td><h3>SOUTHERN</h3></td>\n')
-    for linkdata in SUBARCHIVE:
-        indexpage.write('\t\t<td>\n'
+    for number, linkdata in enumerate(SUBARCHIVE):
+		print 'Here for the', number, 'time'
+		indexpage.write('\t\t<td>\n'
                         '\t\t\t<form action = "' + linkdata + '">\n'
                         '\t\t\t\t<input type="submit" value="' + linkdata + '">\n'
                         '\t\t\t</form>\n'
                         '\t\t<p> ' + str(index) + ' Notes: TODO<p>\n'
-                        '\t\t</td>\n'
-
-                )
-        for num_max in range(max_links):
-            for empty_cells in range(3-index):
-                indexpage.write('\t\t<td> </td>\n')
+                        '\t\t</td>\n')
+    if index < max_index:
+		for num_max in range(max_links-len(SUBARCHIVE)):
+			indexpage.write('\t\t<td> </td>\n')
     indexpage.write('\t</tr>\n')
 indexpage.write('</table>\n'
 				'<script type="text/javascript">\n'
