@@ -439,7 +439,9 @@ indexpage.write('<!DOCTYPE html>\n'
                 '\t<input type="submit" value="Go To First Target">\n'
                 '</form>\n'
                 '<h2>TARGET INDEX</h2>\n'
-                '<table>\n')    
+                '<table>\n') 
+check_link_size = [len(linkagg_sorted[0]), len(linkagg_sorted[1]), len(linkagg_sorted[2]), len(linkagg_sorted[3])]
+max_links = max(check_link_size)
 for index, SUBARCHIVE in enumerate(linkagg_sorted):
     if index is 0:
         indexpage.write('\t<tr>\n')
@@ -462,6 +464,9 @@ for index, SUBARCHIVE in enumerate(linkagg_sorted):
                         '\t\t</td>\n'
 
                 )
+        for num_max in range(max_links):
+            for empty_cells in range(3-index):
+                indexpage.write('\t\t<td> </td>\n')
     indexpage.write('\t</tr>\n')
 indexpage.write('</table>\n'
 				'<script type="text/javascript">\n'
