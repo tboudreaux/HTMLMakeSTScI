@@ -1,6 +1,7 @@
 import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+print 'START'
 scope = ['https://spreadsheets.google.com/feeds']
 
 credentials = ServiceAccountCredentials.from_json_keyfile_name('SummerSTScI-ca588a8e388a.json', scope)
@@ -108,7 +109,7 @@ NORTHDIR = []
 KNOWNDIR = []
 SOUTHDIR = []
 os.chdir('Targets/ARCHIVE')
-ARCHIVES = ['KNOWN', 'SOAR', 'NORTHERN', 'SOUTHERN']
+ARCHIVES = ['SOAR', 'KNOWN', 'NORTHERN', 'SOUTHERN']
 for subdir in ARCHIVES:
     #print 'CURRENT DIRECTORY IS: ', os.path.abspath('.')
     os.chdir(start)
@@ -363,32 +364,46 @@ KNOWNSHEET = SHEET.worksheet("KNOWN")
 NORTHSHEET = SHEET.worksheet("NORTH")
 SOUTHSHEET = SHEET.worksheet("SOUTH")
 SOAR_list = SOARSHEET.range('E2:E288')
-KNOWN_list = KNOWNSHEET.range('E2:E8')
+KNOWN_list = KNOWNSHEET.range('E2:E9')
 NORTH_list = NORTHSHEET.range('E2:E10')
 SOUTH_list = SOUTHSHEET.range('E2:E10')
+SOAR_notes = SOARSHEET.range('C2:C288')
+KNOWN_notes = KNOWNSHEET.range('C2:C9')
+NORTH_notes = NORTHSHEET.range('C2:C10')
+SOUTH_notes = SOUTHSHEET.range('C2:C10')
 SOAR_list_name = SOARSHEET.range('A2:A288')
-KNOWN_list_name = KNOWNSHEET.range('A2:A8')
+KNOWN_list_name = KNOWNSHEET.range('A2:A9')
 NORTH_list_name = NORTHSHEET.range('A2:A10')
 SOUTH_list_name = SOUTHSHEET.range('A2:A10')
 rankings = []
 rankins_names = []
-LIST_list = [SOAR_list, KNOWN_list, NORTH_list, SOUTH_list]
-LIST_list_name = [SOAR_list_name, KNOWN_list_name, SOUTH_list_name]
-LIST_list = sorted(LIST_list)
-LIST_list_name = sorted(LIST_list_name)
+LIST_list = [[x.value for x in SOAR_list], [x.value for x in KNOWN_list], [x.value for x in NORTH_list], [x.value for x in SOUTH_list]]
+LIST_list_name = [[x.value for x in SOAR_list_name], [x.value for x in KNOWN_list_name], [x.value for x in NORTH_list_name],[x.value for x in SOUTH_list_name]]
+LIST_list_notes = [[x.value for x in SOAR_notes], [x.value for x in KNOWN_notes], [x.value for x in NORTH_notes], [x.value for x in SOUTH_notes]]
 for index, (i, j) in enumerate(zip(LIST_list, LIST_list_name)):
-    LIST_list[index] = [x for (y, x) in sorted(zip(j, i))]
-for j in LIST_list:
+    together = zip(j, i)
+    sorted_together = sorted(together)
+    LIST_list[index] = [x[1] for x in sorted_together]
+for index, (i, j) in enumerate(zip(LIST_list_notes, LIST_list_name)):
+    together = zip(j, i)
+    sorted_together = sorted(together)
+    LIST_list_notes[index] = [x[1] for x in sorted_together]
+    LIST_list_name[index] = [x[0] for x in sorted_together]
+for index, j in enumerate(LIST_list):
     sub_rank = []
-    sub_name = []
-    for i in j:
+    for number, i in enumerate(j):
         try:
-            sub_rank.append(int(i.value))
+            sub_rank.append([LIST_list_name[index][number], int(i)])
         except ValueError:
-            print 'NON INT VALUE, APPENDING AS STR - CHECK RANK COLUM (E)'
-            sub_rank.append(i.value)
+            # print 'NON INT VALUE, APPENDING AS STR - CHECK RANK COLUM (E)'
+            sub_rank.append([LIST_list_name[index][number], i])
     rankings.append(sub_rank)
-rankings = [rankings[0], rankings[3], rankings[2], rankings[1]]
+notes = []
+for j in LIST_list_notes:
+        sub_notes = []
+        for i in j:
+                sub_notes.append(i)
+        notes.append(sub_notes)
 indexpage = open('index.html', 'w')
 linkagg = []
 for ARC in ARCHIVES:
@@ -402,18 +417,40 @@ for ARC in ARCHIVES:
             #print folder
             link = 'Targets/ARCHIVE/' + ARC + '/' + folder + '/' + folder + 'ViewPage.html'
             subagg.append(link)
-    elif ARC == 'NORTH':
+    elif ARC == 'NORTHERN':
         for index, folder in enumerate(NORTHDIR):
             link = 'Targets/ARCHIVE/' + ARC + '/' + folder + '/' + folder + 'ViewPage.html'
             subagg.append(link)
-    elif ARC == 'SOUTH':
+    elif ARC == 'SOUTHERN':
         for index, folder in enumerate(SOUTHDIR):
             link = 'Targets/ARCHIVE/' + ARC + '/' + folder + '/' + folder + 'ViewPage.html'
             subagg.append(link)
     linkagg.append(subagg)
-linkagg_sorted = []
-for i, j in zip(linkagg, rankings):
-    linkagg_sorted.append([x for (y, x) in sorted(zip(j, i))])
+linkagg_sorted = [None] * len(linkagg)
+linkagg_tied = [None] * len(linkagg)
+notes_sorted = [None] * len(notes)
+for index_1, SUBARCHIVE in enumerate(rankings):
+    sub_linkagg = []
+    for index_2, target in enumerate(SUBARCHIVE):
+        try:
+            sub_linkagg.append(linkagg[index_1][linkagg[index_1].index('Targets/ARCHIVE/' + ARCHIVES[index_1] + '/' + target[0] + '/' + target[0] + 'ViewPage.html')])
+        except ValueError:
+            sub_linkagg.append('404.html')
+    linkagg_tied[index_1] = sub_linkagg
+raw_rank = []
+for SUBARCHIVE in rankings:
+    sub_raw_rank = []
+    for element in SUBARCHIVE:
+        sub_raw_rank.append(element[1])
+    raw_rank.append(sub_raw_rank)
+for index, (i, j, k) in enumerate(zip(linkagg_tied, raw_rank, notes)):
+    together = zip(j, i, k)
+    sorted_together = sorted(together)
+    print sorted_together
+    linkagg_sorted[index] = [x[1] for x in sorted_together]
+    linkagg_sorted[index].reverse()
+    notes_sorted[index] = [x[2] for x in sorted_together]
+    notes_sorted[index].reverse()
 indexpage.write('<!DOCTYPE html>\n'
                 '<html>\n'
                 '<head>\n'
@@ -432,58 +469,71 @@ indexpage.write('<!DOCTYPE html>\n'
 check_link_size = [len(linkagg_sorted[0]), len(linkagg_sorted[1]), len(linkagg_sorted[2]), len(linkagg_sorted[3])]
 max_links = max(check_link_size)
 max_index = check_link_size.index(max_links)
-#print 'max_link', max_links
 for index, SUBARCHIVE in enumerate(linkagg_sorted):
     if index is 0:
         indexpage.write('\t<tr>\n')
-        indexpage.write('\t<td><h3>KNOWN</h3></td>\n')
+        indexpage.write('\t<td> </td>\n')
+        indexpage.write('\t<td><h3>SOAR</h3></td>\n')
     elif index is 1:
         indexpage.write('\t<tr>\n')
-        indexpage.write('\t<td><h3>SOAR</h3></td>\n')
+        indexpage.write('\t<td> </td>\n')
+        indexpage.write('\t<td><h3>KNOWN</h3></td>\n')
     elif index is 2:
         indexpage.write('\t<tr>\n')
+        indexpage.write('\t<td> </td>\n')
         indexpage.write('\t<td><h3>NORTHERN</h3></td>\n')
     elif index is 3:
         indexpage.write('\t<tr>\n')
+        indexpage.write('\t<td> </td>\n')
         indexpage.write('\t<td><h3>SOUTHERN</h3></td>\n')
     for number, linkdata in enumerate(SUBARCHIVE):
-		print 'Here for the', number, 'time'
-		indexpage.write('\t\t<td>\n'
-                        '\t\t\t<form action = "' + linkdata + '">\n'
-                        '\t\t\t\t<input type="submit" value="' + linkdata + '">\n'
-                        '\t\t\t</form>\n'
-                        '\t\t<p> ' + str(index) + ' Notes: TODO<p>\n'
-                        '\t\t</td>\n')
+        try:
+            indexpage.write('\t\t<td>\n'
+                    '\t\t\t<form action = "' + linkdata + '">\n'
+                    '\t\t\t\t<input type="submit" value="' + linkdata.split('/')[3] + '">\n'
+                    '\t\t\t</form>\n'
+                    '\t\t<p> Notes: ' + str(notes_sorted[index][number]) + '<p>\n'
+                    '\t\t</td>\n')
+        except IndexError:
+            indexpage.write('\t\t<td>\n'
+                    '\t\t\t<form action = "' + linkdata + '">\n'
+                    '\t\t\t\t<input type="submit" value="' + linkdata + '">\n'
+                    '\t\t\t</form>\n'
+                    '\t\t<p> Notes: ' + str(notes[index][number-1]) + '<p>\n'
+                    '\t\t</td>\n')
     if index < max_index:
-		for num_max in range(max_links-len(SUBARCHIVE)):
-			indexpage.write('\t\t<td> </td>\n')
-    indexpage.write('\t</tr>\n')
+        for num_max in range(max_links-len(SUBARCHIVE)):
+            indexpage.write('\t\t<td> </td>\n')
+    indexpage.write('\t</tr>\n\t<tr>\n')
+    for num_max in range(max_links):
+        indexpage.write('\t\t<td> </td>\n')
+    indexpage.write('\t\t<td> </td>\n\t</tr>\n')
 indexpage.write('</table>\n'
-				'<script type="text/javascript">\n'
-				'//<![CDATA[\n'
-				'$(window).load(function(){\n'
-				'\t$("table").each(function() {\n'
-				'\t\tvar $this = $(this);\n'
-				'\t\tvar newrows = [];\n'
-				'\t\t$this.find("tr").each(function(){\n'
-				'\t\t\tvar i = 0;\n'
-				'\t\t\t$(this).find("td, th").each(function(){\n'
-				'\t\t\t\ti++;\n'
-				'\t\t\t\tif(newrows[i] === undefined) { newrows[i] = $("<tr></tr>"); }\n'
-				'\t\t\t\tif(i == 1)\n'
-				'\t\t\t\t\tnewrows[i].append("<th>" + this.innerHTML  + "</th>");\n'
-				'\t\t\t\telse\n'
-				'\t\t\t\t\tnewrows[i].append("<td>" + this.innerHTML  + "</td>");\n'
-				'\t\t\t});\n'
-				'\t\t});\n'
-				'\t\t$this.find("tr").remove();\n'
-				'\t\t$.each(newrows, function(){\n'
-				'\t\t\t$this.append(this);\n'
-				'\t\t});\n'
-				'\t});\n'
-				'\treturn false;\n'
-				'});//]]>\n'
-				'</script>\n'
+                                '<script type="text/javascript">\n'
+                                '//<![CDATA[\n'
+                                '$(window).load(function(){\n'
+                                '\t$("table").each(function() {\n'
+                                '\t\tvar $this = $(this);\n'
+                                '\t\tvar newrows = [];\n'
+                                '\t\t$this.find("tr").each(function(){\n'
+                                '\t\t\tvar i = 0;\n'
+                                '\t\t\t$(this).find("td, th").each(function(){\n'
+                                '\t\t\t\ti++;\n'
+                                '\t\t\t\tif(newrows[i] === undefined) { newrows[i] = $("<tr></tr>"); }\n'
+                                '\t\t\t\tif(i == 1)\n'
+                                '\t\t\t\t\tnewrows[i].append("<th>" + this.innerHTML  + "</th>");\n'
+                                '\t\t\t\telse\n'
+                                '\t\t\t\t\tnewrows[i].append("<td>" + this.innerHTML  + "</td>");\n'
+                                '\t\t\t});\n'
+                                '\t\t});\n'
+                                '\t\t$this.find("tr").remove();\n'
+                                '\t\t$.each(newrows, function(){\n'
+                                '\t\t\t$this.append(this);\n'
+                                '\t\t});\n'
+                                '\t});\n'
+                                '\treturn false;\n'
+                                '});//]]>\n'
+                                '</script>\n'
                 '</body>\n'
                 '</html>')
 indexpage.close()
