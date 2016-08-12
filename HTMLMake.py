@@ -7,7 +7,7 @@ scope = ['https://spreadsheets.google.com/feeds']
 credentials = ServiceAccountCredentials.from_json_keyfile_name('SummerSTScI-ca588a8e388a.json', scope)
 
 gc = gspread.authorize(credentials)
-checkstar = 'parvatii'
+checkstar = 'hs_2149+1428'
 start = os.path.abspath('.')
 urls_raw = [x.rsplit()[1] for x in open('tempurl.csv', 'rb').readlines()]
 indexes_raw = [x.rsplit()[0] for x in open('tempurl.csv', 'rb').readlines()]
@@ -55,7 +55,8 @@ targetzone_use = []
 prevzonenum = 0
 prev_targ = indexes[0].split('_')[0] + '_' + indexes[0].split('_')[1]
 for index, target in enumerate(indexes):
-#    print 'number ', index, 'of ', len(indexes)
+    #print 'number ', index, 'of ', len(indexes)
+    #print target
     if checkstar in target:
         print 'trace a'
     target_check = target.split('_')
@@ -120,9 +121,9 @@ for subdir in ARCHIVES:
         KNOWNDIR = dir
     elif subdir == 'SOAR':
         SOARDIR = dir
-    elif subdir == 'NORTH':
+    elif subdir == 'NORTHERN':
         NORTHDIR = dir
-    elif subdir == 'SOUTH':
+    elif subdir == 'SOUTHERN':
         SOUTHDIR = dir
     xloc = 0
     addon = 'Targets/ARCHIVE/' + subdir
@@ -159,19 +160,33 @@ for subdir in ARCHIVES:
             else:
                 xloc += 1
         xloc = 0
+        raw_graphs = []
+        graph_init_order = []
+        power_graphs = []
+        power_graph_init_order = []
         for x in checkzones:
-            if '.png' in x and 'ZONE' in x and not '._' in x:
-                zonefind = x.find('ZONE')
+            if '.html' in x and 'ZONE' in x and not '._' in x and not 'POWERSPEC' in x and not 'all' in x and not '60s' in x and not '10s' in x:
                 try:
-                    checknum = int(x[zonefind + 5:zonefind + 7])
-                    pathtox[checknum - 1] = x
-                except ValueError:
-                    checknum = int(x[zonefind + 5])
-                    pathtox[checknum -1] = x
-                if checknum > int(numzones):
-                    numzones = checknum
-                else:
-                    pass
+                    graph_init_order.append(int(x.split('_')[3].strip('.html')))
+                except ValueError as e:
+                    print 'NON FATAL ERROR, ATTEMPTING RECOVERY:', e
+                    tempx = x.split('_')
+                    tempindex = tempx.index('ZONE')
+                    graph_init_order.append(int(tempx[tempindex+1].strip('.html')))
+                    print 'ERROR RECOVERY SUCSSESSFUL, CONTINUING AS NORMAL'
+                raw_graphs.append(x)
+            elif '.html' in x and 'ZONE' in x and not '._' in x and 'POWERSPEC' in x and not 'all' in x and not '60s' in x and not '10s' in x:
+                try:
+                    power_graph_init_order.append(int(x.split('_')[3].strip('.html')))
+                except ValueError as e:
+                    print 'NON FATAL ERROR, ATTEMPTING RECOVERY: ', e
+                    tempx = x.split('_')
+                    tempindex = tempx.index('ZONE')
+                    graph_init_order.append(int(tempx[tempindex+1].strip('.html')))
+                    print 'ERROR RECOVERY SUCSSESFUL, CONTINUING AS NORMAL'
+                power_graphs.append(x)
+            elif '.html' in x and 'ZONE' in x and not '._' in x and not 'POWERSPEC' in x and 'all' in x:
+                allplot = x
             elif '.png' in x and 'Count' in x and '._' not in x[0:3]:
                 imageforpage = x
         if firstlinkrec is False:
@@ -181,12 +196,16 @@ for subdir in ARCHIVES:
             pass
         if alright is False:
             htmlout = open(dir[i] + 'ViewPage.html', 'w')
-        try:
-            zoneindex = targetzone_ind.index(dir[i])
-        except ValueError:
+        together = zip(graph_init_order, raw_graphs)
+        sorted_together = sorted(together)
+        graphs = [x[1] for x in sorted_together]
+        try: 
+            numzones = max(graph_init_order)
+        except ValueError as e:
+            print 'NON FATAL ERROR: ', e
+            print 'Moving to next target with hard failure on target:', dir[i]
             os.chdir(working_dir)
             continue
-        numzones = targetzone_use[zoneindex]
         for k in range((len(dir) - i) - 1):
             precheckhtml = os.listdir(os.path.abspath('..') + '/' + dir[i + k + 1])
             for x in precheckhtml:
@@ -207,11 +226,11 @@ for subdir in ARCHIVES:
             nextlink = '../../../../' + addon + '/' + dir[i] + '/' + dir[i] + 'ViewPage.html'
         pagenum += 1
         URLINDEX = 0
-        allplot = all_url[all_index.index(dir[i])]
+        #~ allplot = all_url[all_index.index(dir[i])]
         if dir[i] == checkstar:
             print htmlgo, alright
         if htmlgo is True and alright is False:
-            #print 'writing out file for', dir[i]
+            # print 'writing out file for', dir[i], ' | target ', i, ' out of', numtarg
             htmlout.write('<!DOCTYPE html>\n'
                           '<html>\n'
                           '<head>\n'
@@ -251,17 +270,17 @@ for subdir in ARCHIVES:
                           )
             if numzones > 1:
                 for p in xrange(0, numzones, 2):
-                    UI1 = indexes.index(dir[i] + '_ZONE_' + str(p+1))
-                    if numzones % 2 == 0 or p+1 != numzones:
-                        UI2 = indexes.index(dir[i] + '_ZONE_' + str(p+2))
+                    #~ UI1 = indexes.index(dir[i] + '_ZONE_' + str(p+1))
+                    #~ if numzones % 2 == 0 or p+1 != numzones:
+                        #~ UI2 = indexes.index(dir[i] + '_ZONE_' + str(p+2))
                     htmlout.write('<tr>\n')
-                    htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + ulrs[UI1] + '"></iframe></td>\n')
+                    htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + graphs[p] + '"></iframe></td>\n')
                     if numzones % 2 == 0 or p+1 != numzones:
-                        htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + ulrs[UI2] + '"></iframe></td>\n')
+                        htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + graphs[p+1] + '"></iframe></td>\n')
                     htmlout.write('</tr>\n')
             elif numzones == 1:
-                UI1 = indexes.index(dir[i] + '_ZONE_1')
-                htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + ulrs[UI1] + '"></iframe></td>\n')
+                #~ UI1 = indexes.index(dir[i] + '_ZONE_1')
+                htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + graphs[p] + '"></iframe></td>\n')
             htmlout.write('</table>\n'
                           '<power>\n'
                           '<h2> POWER SPECTRUM </h2>\n'
@@ -269,17 +288,17 @@ for subdir in ARCHIVES:
                           )
             if numzones > 1:
                 for p in xrange(0, numzones, 2):
-                    UI1 = power_index.index(dir[i] + '_ZONE_' + str(p+1) + '_POWERSPEC')
-                    if numzones % 2 == 0 or p+1 != numzones:
-                        UI2 = power_index.index(dir[i] + '_ZONE_' + str(p+2) + '_POWERSPEC')
+                    #~ UI1 = power_index.index(dir[i] + '_ZONE_' + str(p+1) + '_POWERSPEC')
+                    #~ if numzones % 2 == 0 or p+1 != numzones:
+                        #~ UI2 = power_index.index(dir[i] + '_ZONE_' + str(p+2) + '_POWERSPEC')
                     htmlout.write('<tr>\n')
-                    htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + power_url[UI1] + '"></iframe></td>\n')
+                    htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + power_graphs[p] + '"></iframe></td>\n')
                     if numzones % 2 == 0 or p+1 != numzones:
-                        htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + power_url[UI2] + '"></iframe></td>\n')
+                        htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + power_graphs[p+1] + '"></iframe></td>\n')
                     htmlout.write('</tr>\n')
             elif numzones == 1:
-                UI1 = power_index.index(dir[i] + '_ZONE_1' + '_POWERSPEC')
-                htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + power_url[UI1] + '"></iframe></td>\n')
+                #~ UI1 = power_index.index(dir[i] + '_ZONE_1' + '_POWERSPEC')
+                htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + power_graphs[p] + '"></iframe></td>\n')
             htmlout.write('</table>\n'
                           '</power>\n'
                           '<h2>Flag Lookup Table</h2>'
@@ -324,22 +343,22 @@ for subdir in ARCHIVES:
                           '<table style = "width:75%">\n'
                           '\t<tr>\n'
                           '\t\t<td><img src="' + imageforpage + '" alt="star", style="width:500px;height:500px;"></td>\n'
-                          '\t\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + allplot + '.embed"></iframe></td>\n'
+                          '\t\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + allplot + '"></iframe></td>\n'
                           '\t</tr>\n'
                           )
             if numzones > 1:
                 for p in xrange(0, numzones, 2):
-                    UI1 = indexes.index(dir[i] + '_ZONE_' + str(p+1))
-                    if numzones % 2 == 0 or p+1 != numzones:
-                        UI2 = indexes.index(dir[i] + '_ZONE_' + str(p+2))
+                    #~ UI1 = indexes.index(dir[i] + '_ZONE_' + str(p+1))
+                    #~ if numzones % 2 == 0 or p+1 != numzones:
+                        #~ UI2 = indexes.index(dir[i] + '_ZONE_' + str(p+2))
                     htmlout.write('<tr>\n')
-                    htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + ulrs[UI1] + '.embed"></iframe></td>\n')
+                    htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + graphs[p] + '"></iframe></td>\n')
                     if numzones % 2 == 0 or p+1 != numzones:
-                        htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + ulrs[UI2] + '.embed"></iframe></td>\n')
+                        htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + graphs[p+1] + '"></iframe></td>\n')
                     htmlout.write('</tr>\n')
             elif numzones == 1:
-                UI1 = indexes.index(dir[i] + '_ZONE_1')
-                htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + ulrs[UI1] + '.embed"></iframe></td>\n')
+                #~ UI1 = indexes.index(dir[i] + '_ZONE_1')
+                htmlout.write('\t<td><iframe width="650" height="650" frameborder="0" scrolling="no" src="' + graphs[p] + '.embed"></iframe></td>\n')
             htmlout.write('<form action="' + prevlink + '">\n'
                           '\t<input type="submit" value="Go To Previous Target">\n'
                           '</form>\n'
@@ -365,16 +384,16 @@ NORTHSHEET = SHEET.worksheet("NORTH")
 SOUTHSHEET = SHEET.worksheet("SOUTH")
 SOAR_list = SOARSHEET.range('E2:E288')
 KNOWN_list = KNOWNSHEET.range('E2:E9')
-NORTH_list = NORTHSHEET.range('E2:E10')
-SOUTH_list = SOUTHSHEET.range('E2:E10')
+NORTH_list = NORTHSHEET.range('E2:E1051')
+SOUTH_list = SOUTHSHEET.range('E2:E126')
 SOAR_notes = SOARSHEET.range('C2:C288')
 KNOWN_notes = KNOWNSHEET.range('C2:C9')
-NORTH_notes = NORTHSHEET.range('C2:C10')
-SOUTH_notes = SOUTHSHEET.range('C2:C10')
+NORTH_notes = NORTHSHEET.range('C2:C1051')
+SOUTH_notes = SOUTHSHEET.range('C2:C126')
 SOAR_list_name = SOARSHEET.range('A2:A288')
 KNOWN_list_name = KNOWNSHEET.range('A2:A9')
-NORTH_list_name = NORTHSHEET.range('A2:A10')
-SOUTH_list_name = SOUTHSHEET.range('A2:A10')
+NORTH_list_name = NORTHSHEET.range('A2:A1051')
+SOUTH_list_name = SOUTHSHEET.range('A2:A126')
 rankings = []
 rankins_names = []
 LIST_list = [[x.value for x in SOAR_list], [x.value for x in KNOWN_list], [x.value for x in NORTH_list], [x.value for x in SOUTH_list]]
@@ -446,7 +465,6 @@ for SUBARCHIVE in rankings:
 for index, (i, j, k) in enumerate(zip(linkagg_tied, raw_rank, notes)):
     together = zip(j, i, k)
     sorted_together = sorted(together)
-    print sorted_together
     linkagg_sorted[index] = [x[1] for x in sorted_together]
     linkagg_sorted[index].reverse()
     notes_sorted[index] = [x[2] for x in sorted_together]
@@ -460,7 +478,7 @@ indexpage.write('<!DOCTYPE html>\n'
                 '<body>\n'
                 '<h1>STScI Summer internship FIRST PAGE | EXPERIMENTAL VERSION</h1>\n'
                 '<p>This is currently being created with the prerun script meaning it is in active development, features may not work or may be semi working, thanks for your paitience</p>\n'
-                '<p> Currently there is an issue with the flag system so just ignore the colors, also it cause PG_0016+151 to break, the jackalope is the placeholder and there are some issues, hopefully they will be sorted soon, bye now</p>\n'
+                '<p> Current Bugs: while moving all graphs to locally hosted plotly graphs there are issues with many not showing up due to me not having fully migrated, this will be fixed soon, I have to modify the graph make routien to run for multiple subarchives but that will not take all too long to do, so hopefully by the end of friday all targets or at least most targets should be working. Everything else here is more or less in working order, updates from google sheets work (tho the script has to be re run for them to take effect, once I get the buttons working fully I am going to make a cron job to run it every couple minutes or so so that it "live" updates) Cool</p>\n'
                 '<form action="' + firstlink + '">\n'
                 '\t<input type="submit" value="Go To First Target">\n'
                 '</form>\n'
@@ -481,25 +499,32 @@ for index, SUBARCHIVE in enumerate(linkagg_sorted):
     elif index is 2:
         indexpage.write('\t<tr>\n')
         indexpage.write('\t<td> </td>\n')
-        indexpage.write('\t<td><h3>NORTHERN</h3></td>\n')
+        indexpage.write('\t<td><h3>NORTHERN | NDC</h3></td>\n')
     elif index is 3:
         indexpage.write('\t<tr>\n')
         indexpage.write('\t<td> </td>\n')
         indexpage.write('\t<td><h3>SOUTHERN</h3></td>\n')
     for number, linkdata in enumerate(SUBARCHIVE):
+        if linkdata == '404.html' or linkdata.split('/')[4] not in os.listdir(linkdata.split('/')[0] + '/' + linkdata.split('/')[1] + '/' + linkdata.split('/')[2] + '/' + linkdata.split('/')[3]):
+            print 'NO TARGET DATA'
+            use_link = '404.html'
+            use_note = 'Data not in Local archive yet'
+        else:
+            use_link = linkdata
+            use_note = str(notes_sorted[index][number])
         try:
             indexpage.write('\t\t<td>\n'
-                    '\t\t\t<form action = "' + linkdata + '">\n'
+                    '\t\t\t<form action = "' + use_link + '">\n'
                     '\t\t\t\t<input type="submit" value="' + linkdata.split('/')[3] + '">\n'
                     '\t\t\t</form>\n'
-                    '\t\t<p> Notes: ' + str(notes_sorted[index][number]) + '<p>\n'
+                    '\t\t<p> Notes: ' + use_note + '<p>\n'
                     '\t\t</td>\n')
         except IndexError:
             indexpage.write('\t\t<td>\n'
-                    '\t\t\t<form action = "' + linkdata + '">\n'
+                    '\t\t\t<form action = "' + use_link + '">\n'
                     '\t\t\t\t<input type="submit" value="' + linkdata + '">\n'
                     '\t\t\t</form>\n'
-                    '\t\t<p> Notes: ' + str(notes[index][number-1]) + '<p>\n'
+                    '\t\t<p> Notes: ' + use_note + '<p>\n'
                     '\t\t</td>\n')
     if index < max_index:
         for num_max in range(max_links-len(SUBARCHIVE)):
