@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "summerstsci",
+  "private_key_id": "ca588a8e388a395350b5ecf174e3a13b2404eb48",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQC0YOQJTA5eQAb/\nSc8pR00bEkAgOSrD7B1SftlHEI/ZPz7SqfkWuF1WgQqJaBLg0RIPm9XscYcsHF7X\nKxzhNoy8j0GP6+j2RDhSwEoK8WDM5Q4fgs7YnXRiFZr1ENqcx1vHrgUEx3C5kxZ2\nttsjrLaNOqlmyKqT0Ch4PEUdBdELgpTNtHm6roDuNlkc0Kye6MToXrQuZcaMmZtY\n1umczbTXcSIRqceHdqO+n0/4hQ7nbmxSi/pQpfcd95YAUj71vhTbMPAX7p82MaEj\nWHM3qNZ7dJXSBd6L7tqTEbeFuT0tKFAy9t23gpOGDklJw9a2FP2A0jcW9MLSlSEp\nfIO4NCrZAgMBAAECggEABMRawnQkHRGMHcsRkoGz4/dDgpaALtVaoQeBLoOdiZxG\nSML9NkCBFvwqDx+VACQGWitAKBOIAv5s8zrMdJdAeOtATFFrwrZi1q0GR+vBJykW\ninamiMsAfGcdxURAwsvx/QD4WPv8WqsseM60U+kImgrm1zSObYGe0C6nlPDGaYtq\njBHlTGPbwxQEd+beW2CgUm8Qn0mgvtWc93kvYhw+iC9xfjcjKs2qqWJKoed2yhpw\npw9HEciUNLCxmuYaYSpuAZ/eKdSnP4xm4YGb8orhJ6Cs7A/9g1lAIeVRU5gsUSUg\naU2kpTAjc0OKtQr+6FI3gPDDlOOIZxQOQsJhFA0DQQKBgQDhyQ8b+istLK4jN6+r\nrkDLY+StpJYFRiLySgnTGvJLNfxzUJDAmF50rpf22VY18znxnVUWmdB07Mr3zyXk\n/KCplXMhAP2LJVxqbfP0Cc4cnMWjFV2snQBf6/FTgrQtWZly+dhXv7NAOjdCDoYA\nenICxmH/mSoAD479sY8OZNWVnQKBgQDMhEju2vJ0bjO7hgo0C2lZb0iAkvBEdWmu\nzzjcFIkjNib79Z+fLtLLSTyOTZRvfAE6CvPEOPSMpYMwSN2Hmv2dhLmzpGtNYnk3\nBItNfm8rA6j0ZstvhLGo5P2flzICCI4K+ryu72q5Ezs+uFRPiOu50XTekEA5Nj6y\nuEbB01sjbQKBgAigbftbq5qmQmEGF6gvmDotLueTikfZTiyDt6xhMzC8d1DQmzdA\nmxtKMHQ2CZ02FditcjrS1awh//9H4uLE5D6WfzebmhRe8RD/8no4ha+CLer1PgcC\nWKlRkn7mV4wECGDkOuffYzHpB4N2mpgaFZEVk1j4uSoXbhczWYvrPl3hAn9TFWqL\nnmbg5eQeSlXazsf9jTfnA8qYBRrp6UUwIyeTJmyv7xjpkhwQebAgH2Qt5jKZYdml\n3X17pcGl2/QjItPlKgZG9ISi615S+4Wb9cEzuEjrANekdkO2WVCvhLzMFq2dyD7e\n0mSIy0dGM5wMs5MP6geQYwm0NFVERZh5JWPhAoGBALEOFZm1SN0AqQLzkmRpeRnx\nfZ8L/hiKxse5w/eDwnOHFElEkiQpAAw0J3l55npE4CIbSTtO6XW47a2QV91Dxeaa\nH6SZ0LOHFjoREC+TYRTkhsTowPs2Pvz4KsLpdzZaVtgt2LaJzk2txeKFmeCJ28Yu\na1PIIsnt/6C4Pu/vdMjp\n-----END PRIVATE KEY-----\n",
+  "client_email": "summerstsci@appspot.gserviceaccount.com",
+  "client_id": "105172553809730832414",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/summerstsci%40appspot.gserviceaccount.com"
+}
