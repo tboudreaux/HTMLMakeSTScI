@@ -169,11 +169,7 @@ for subdir in ARCHIVES:
             if '.html' in x and 'ZONE' in x and not '._' in x and not 'POWERSPEC' in x and not 'all' in x and not '60s' in x and not '10s' in x:
                 try:
                     graph_init_order.append(int(x.split('_')[3].strip('.html')))
-                    if dir[i] == checkstar:
-                    	print 'appending ', x.split('_')[3].strip('.html'), ' to', dir[i] 
                 except ValueError as e:
-                	if dir[i] == checkstar:
-                        print 'appending (In Error Block):', x.split('_')[3].strip('.html'), 'to', dir[i] 
                     print 'NON FATAL ERROR, ATTEMPTING RECOVERY:', e
                     tempx = x.split('_')
                     tempindex = tempx.index('ZONE')
@@ -477,12 +473,12 @@ indexpage.write('<!DOCTYPE html>\n'
                 '<form action="' + firstlink + '">\n'
                 '\t<input type="submit" value="Go To First Target">\n'
                 '</form>\n'
-                '<h2>TARGET INDEX</h2>\n'
-                '<table>\n') 
+                '<h2>TARGET INDEX</h2>\n') 
 check_link_size = [len(linkagg_sorted[0]), len(linkagg_sorted[1]), len(linkagg_sorted[2]), len(linkagg_sorted[3])]
 max_links = max(check_link_size)
 max_index = check_link_size.index(max_links)
 for index, SUBARCHIVE in enumerate(linkagg_sorted):
+    indexpage.write('<table style="border: 1px solid black">\n')
     if index is 0:
         indexpage.write('\t<tr>\n')
         indexpage.write('\t<td> </td>\n')
@@ -512,24 +508,26 @@ for index, SUBARCHIVE in enumerate(linkagg_sorted):
                     '\t\t\t<form action = "' + use_link + '">\n'
                     '\t\t\t\t<input type="submit" value="' + linkdata.split('/')[3] + '">\n'
                     '\t\t\t</form>\n'
-                    '\t\t<p> Notes: ' + use_note + '<p>\n'
                     '\t\t</td>\n')
         except IndexError:
             indexpage.write('\t\t<td>\n'
                     '\t\t\t<form action = "' + use_link + '">\n'
                     '\t\t\t\t<input type="submit" value="' + linkdata + '">\n'
                     '\t\t\t</form>\n'
-                    '\t\t<p> Notes: ' + use_note + '<p>\n'
                     '\t\t</td>\n')
-    if index < max_index:
-        for num_max in range(max_links-len(SUBARCHIVE)):
-            indexpage.write('\t\t<td> </td>\n')
-    indexpage.write('\t</tr>\n\t<tr>\n')
-    for num_max in range(max_links):
-        indexpage.write('\t\t<td> </td>\n')
-    indexpage.write('\t\t<td> </td>\n\t</tr>\n')
-indexpage.write('</table>\n'
-                                '<script type="text/javascript">\n'
+    indexpage.write('\t</tr>\n\t<tr>\n'
+                    '\t\t<td> </td>\n'
+                    '\t\t<td><h3>Rank</h3></td>\n')
+    run_list = sorted(raw_rank[index])
+    for number, rank in enumerate(reversed(run_list)):
+        indexpage.write('\t\t<td>' + str(rank) + '</td>\n')
+    indexpage.write('\t</tr>\n\t<tr>\n'
+                    '\t\t<td> </td>\n'
+                    '\t\t<td><h3>Notes</h3></td>\n')
+    for number, notes in enumerate(notes_sorted[index]):
+        indexpage.write('\t\t<td>' + str(notes) + '</td>\n')
+    indexpage.write('\t</tr>\n</table>\n')
+indexpage.write('<script type="text/javascript">\n'
                                 '//<![CDATA[\n'
                                 '$(window).load(function(){\n'
                                 '\t$("table").each(function() {\n'
