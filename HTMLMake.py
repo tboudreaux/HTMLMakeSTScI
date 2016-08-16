@@ -1,13 +1,14 @@
+#!/home/tboudreaux/anaconda/bin/python
 import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 print 'START'
 scope = ['https://spreadsheets.google.com/feeds']
 
-credentials = ServiceAccountCredentials.from_json_keyfile_name('SummerSTScI-ca588a8e388a.json', scope)
+credentials = ServiceAccountCredentials.from_json_keyfile_name('../SummerSTScI-ca588a8e388a.json', scope)
 
 gc = gspread.authorize(credentials)
-checkstar = 'hs_2149+1428'
+checkstar = 'sdssj_141812.51-024426.9'
 start = os.path.abspath('.')
 urls_raw = [x.rsplit()[1] for x in open('tempurl.csv', 'rb').readlines()]
 indexes_raw = [x.rsplit()[0] for x in open('tempurl.csv', 'rb').readlines()]
@@ -163,12 +164,16 @@ for subdir in ARCHIVES:
         raw_graphs = []
         graph_init_order = []
         power_graphs = []
-        power_graph_init_order = []
+        power_graph_init_order = [] 
         for x in checkzones:
             if '.html' in x and 'ZONE' in x and not '._' in x and not 'POWERSPEC' in x and not 'all' in x and not '60s' in x and not '10s' in x:
                 try:
                     graph_init_order.append(int(x.split('_')[3].strip('.html')))
+                    if dir[i] == checkstar:
+                    	print 'appending ', x.split('_')[3].strip('.html'), ' to', dir[i] 
                 except ValueError as e:
+                	if dir[i] == checkstar:
+                        print 'appending (In Error Block):', x.split('_')[3].strip('.html'), 'to', dir[i] 
                     print 'NON FATAL ERROR, ATTEMPTING RECOVERY:', e
                     tempx = x.split('_')
                     tempindex = tempx.index('ZONE')
@@ -182,7 +187,7 @@ for subdir in ARCHIVES:
                     print 'NON FATAL ERROR, ATTEMPTING RECOVERY: ', e
                     tempx = x.split('_')
                     tempindex = tempx.index('ZONE')
-                    graph_init_order.append(int(tempx[tempindex+1].strip('.html')))
+                    power_graph_init_order.append(int(tempx[tempindex+1].strip('.html')))
                     print 'ERROR RECOVERY SUCSSESFUL, CONTINUING AS NORMAL'
                 power_graphs.append(x)
             elif '.html' in x and 'ZONE' in x and not '._' in x and not 'POWERSPEC' in x and 'all' in x:
@@ -478,7 +483,10 @@ indexpage.write('<!DOCTYPE html>\n'
                 '<body>\n'
                 '<h1>STScI Summer internship FIRST PAGE | EXPERIMENTAL VERSION</h1>\n'
                 '<p>This is currently being created with the prerun script meaning it is in active development, features may not work or may be semi working, thanks for your paitience</p>\n'
-                '<p> Current Bugs: while moving all graphs to locally hosted plotly graphs there are issues with many not showing up due to me not having fully migrated, this will be fixed soon, I have to modify the graph make routien to run for multiple subarchives but that will not take all too long to do, so hopefully by the end of friday all targets or at least most targets should be working. Everything else here is more or less in working order, updates from google sheets work (tho the script has to be re run for them to take effect, once I get the buttons working fully I am going to make a cron job to run it every couple minutes or so so that it "live" updates) Cool</p>\n'
+                '<p> Current Bugs: while moving all graphs to locally hosted plotly graphs there are issues with many not showing up due to me not having fully migrated, this will be fixed soon, '
+                'I have to modify the graph make routien to run for multiple subarchives but that will not take all too long to do, so hopefully by the end of friday all targets or at least most '
+                'targets should be working. Everything else here is more or less in working order, updates from google sheets work (tho the script has to be re run for them to take effect, once I '
+                'get the buttons working fully I am going to make a cron job to run it every couple minutes or so so that it "live" updates) Cool</p>\n'
                 '<form action="' + firstlink + '">\n'
                 '\t<input type="submit" value="Go To First Target">\n'
                 '</form>\n'
@@ -506,7 +514,7 @@ for index, SUBARCHIVE in enumerate(linkagg_sorted):
         indexpage.write('\t<td><h3>SOUTHERN</h3></td>\n')
     for number, linkdata in enumerate(SUBARCHIVE):
         if linkdata == '404.html' or linkdata.split('/')[4] not in os.listdir(linkdata.split('/')[0] + '/' + linkdata.split('/')[1] + '/' + linkdata.split('/')[2] + '/' + linkdata.split('/')[3]):
-            print 'NO TARGET DATA'
+            print 'NO TARGET DATA | ', ARCHIVES[index]
             use_link = '404.html'
             use_note = 'Data not in Local archive yet'
         else:
